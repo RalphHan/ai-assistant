@@ -100,7 +100,7 @@ async def get_blessings(holiday, desc, city, weather, hashtags):
     return (await call_model(messages, enable_search=False))[:30]
 
 
-async def generate_messages(user_name):
+async def generate_and_send_messages(user_name, no_sms=False):
     try:
         user = USERS[user_name]
         city = user['city']
@@ -123,11 +123,14 @@ async def generate_messages(user_name):
             "hashtag3": hashtags[2],
             "blessings": blessings,
         }
-        return message
+        state = False
+        if not no_sms:
+            state = await send_sms(**message)
+        return message, state
     except Exception:
         import traceback
         traceback.print_exc()
-        return {"name": user_name}
+        return {"name": user_name}, False
 
 
 async def main():
@@ -140,12 +143,8 @@ async def main():
         args.to = list(USERS.keys())
     else:
         args.to = args.to.strip().split(',')
-    messages = await asyncio.gather(*[generate_messages(user_name) for user_name in args.to])
-    print(json.dumps(messages, indent=2, ensure_ascii=False))
-    if not args.no_sms:
-        state = await asyncio.gather(*[send_sms(**message) for message in messages])
-        print(args.to)
-        print(state)
+    results = await asyncio.gather(*[generate_and_send_messages(user_name, args.no_sms) for user_name in args.to])
+    print(json.dumps(results, indent=2, ensure_ascii=False))
 
 
 if __name__ == '__main__':
