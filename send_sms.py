@@ -5,7 +5,6 @@ from alibabacloud_dysmsapi20170525.client import Client as Dysmsapi20170525Clien
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_dysmsapi20170525 import models as dysmsapi_20170525_models
 from alibabacloud_tea_util import models as util_models
-from alibabacloud_tea_util.client import Client as UtilClient
 
 
 def create_client() -> Dysmsapi20170525Client:
@@ -32,8 +31,7 @@ async def send_sms(phone_numbers=None, **kwargs):
     try:
         await client.send_sms_with_options_async(send_sms_request, util_models.RuntimeOptions())
         return True
-    except Exception as error:
-        print(error.message)
-        print(error.data.get("Recommend"))
-        UtilClient.assert_as_string(error.message)
-    return False
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        return False
