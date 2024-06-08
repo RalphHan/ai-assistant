@@ -53,10 +53,16 @@ async def call_model(messages, enable_search=True):
             traceback.print_exc()
     return "无数据"
 
+weekday_str = "一二三四五六日"
 
 async def get_holiday():
+    from datetime import datetime
+    now = datetime.now()
+    current_date = now.strftime("%Y年%m月%d日")
+    weekday_index = now.weekday()
+    prompt = f'{current_date}星期{weekday_str[weekday_index]}是工作日还是某个节假日？总结为不超过5字'
     messages = [{'role': 'system', 'content': '你是一个日历查询机器人'},
-                {'role': 'user', 'content': '今天是工作日还是某个节假日？总结为不超过5字'}]
+                {'role': 'user', 'content': prompt}]
     return (await call_model(messages))[:30]
 
 
