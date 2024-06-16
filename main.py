@@ -68,7 +68,7 @@ async def get_holiday():
 
 async def get_weather(city):
     messages = [{'role': 'system', 'content': '你是一个天气查询机器人'},
-                {'role': 'user', 'content': f'今天{city}天气怎么样？总结为不超过25字'}]
+                {'role': 'user', 'content': f'今天{city}天气怎么样，最高气温是多少？总结为不超过25字'}]
     return (await call_model(messages))[:30]
 
 
