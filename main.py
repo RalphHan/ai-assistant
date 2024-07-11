@@ -53,7 +53,9 @@ async def call_model(messages, enable_search=True):
             traceback.print_exc()
     return "无数据"
 
+
 weekday_str = "一二三四五六日"
+
 
 async def get_holiday():
     from datetime import datetime
@@ -71,7 +73,8 @@ async def get_weather(city):
                 {'role': 'user', 'content': f'今天{city}天气怎么样？最高气温是多少？'}]
     response1 = await call_model(messages)
     messages.append({'role': 'assistant', 'content': response1})
-    messages.append({'role': 'user', 'content': '总结一下有哪些信息并忽略没有的信息：天气，最高气温，空气质量，湿度，风速。不超过25字'})
+    messages.append(
+        {'role': 'user', 'content': '总结一下有哪些信息并忽略没有的信息：天气，最高气温，空气质量，湿度，风速。不超过25字'})
     response2 = await call_model(messages, enable_search=False)
     return response2[:30]
 
@@ -102,12 +105,21 @@ async def get_hashtags():
 
 async def get_blessings(holiday, desc, city, weather, hashtags):
     hashtag_message = '；'.join(hashtags)
-    prompt = f"{holiday}\n我是一名{desc}，我在{city}，今天的天气是：{weather}，\n今天的新闻是：{hashtag_message}\n请依照这些信息，为我写一段晨间祝福语。总结为不超过25字"
+    prompt = f"{holiday}\n我是一名{desc}，我在{city}，今天的天气是：{weather}，\n今天的新闻是：{hashtag_message}"
     print(prompt)
-    messages = [{'role': 'system', 'content': '你是一生成祝福语的机器人'},
+    messages = [{'role': 'system', 'content': "你是一生成祝福语的机器人。\n"
+                                              "如果是节假日或周末，请直接包含节日祝福（不要说今天是何种节日）。\n"
+                                              "如果是极端天气（如高温、雨雪冰雹、雾霾等），请直接提醒我涂防晒、打伞、戴口罩等（不要说今天天气如何）。\n"
+                                              "如果有有趣的新闻，可以进行幽默地调侃。"
+                                              "比如，如果节日是端午节，新闻是小米su7车祸，你可以说：su7也会赛龙舟。\n"
+                                              "请依照以下信息，为我写一段晨间祝福语。\n"},
                 {'role': 'user',
                  'content': prompt}]
-    return (await call_model(messages, enable_search=False))[:30]
+    response1 = await call_model(messages, enable_search=False)
+    messages.append({'role': 'assistant', 'content': response1})
+    messages.append({'role': 'user', 'content': '总结成不超过10字'})
+    response2 = await call_model(messages, enable_search=False)
+    return response2[:30]
 
 
 async def generate_and_send_messages(user_name, no_sms=False):
