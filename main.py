@@ -74,7 +74,7 @@ async def get_weather(city):
     response1 = await call_model(messages)
     messages.append({'role': 'assistant', 'content': response1})
     messages.append(
-        {'role': 'user', 'content': '总结一下有哪些信息并忽略没有的信息：天气，最高气温，空气质量，湿度，风速。不超过25字'})
+        {'role': 'user', 'content': '总结一下，不超过25字'})
     response2 = await call_model(messages, enable_search=False)
     return response2[:30]
 
